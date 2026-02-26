@@ -13,6 +13,8 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::get('/dashboard', [ColocationController::class, 'index'])->name('dashboard');
     Route::get('/colocations/{id}', [ColocationController::class, 'show'])->name('colocations.show');
     Route::get('expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
+    Route::get('expenses/{id}', [ExpenseController::class, 'show'])->name('expenses.show');
+    Route::post('expenses/{id}/mark-paid', [ExpenseController::class, 'markAsPaid'])->name('expenses.markAsPaid');
 });
 
 Route::middleware('auth')->group(function () {

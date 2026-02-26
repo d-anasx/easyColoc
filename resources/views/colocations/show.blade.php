@@ -129,16 +129,16 @@
                                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Titre</th>
                                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Montant</th>
                                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Payé par</th>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Catégorie</th>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Date</th>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($colocation->expenses as $expense)
-                                        <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                        <tr class="border-b border-gray-200 hover:bg-gray-300 duration-100 transition">
+
                                             <td class="px-6 py-4">
-                                                <p class="text-sm font-medium text-gray-900">{{ $expense->title }}</p>
+                                                <a href="{{ route('expenses.show', $expense->id) }}">
+                                                    <p class="text-sm font-medium text-gray-900">{{ $expense->title }}</p>
+                                                </a>
                                             </td>
                                             <td class="px-6 py-4">
                                                 <p class="text-sm text-gray-600 font-semibold">
@@ -147,17 +147,7 @@
                                             <td class="px-6 py-4">
                                                 <p class="text-sm text-gray-600">{{ $expense->createdBy->name }}</p>
                                             </td>
-                                            <td class="px-6 py-4">
-                                                <span
-                                                    class="inline-block px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded">{{ $expense->category->name }}</span>
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                <p class="text-sm text-gray-500">{{ $expense->created_at }}</p>
-                                            </td>
-                                            <td class="px-6 py-4 text-right">
-                                                <a href=""
-                                                    class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Modifier</a>
-                                            </td>
+
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -192,15 +182,8 @@
                                             class="font-semibold text-emerald-600">{{ number_format($settlement['amount'], 2, ',', '.') }}€</span>
                                         <span class="text-gray-600"> à </span>
                                         <span class="font-semibold text-indigo-600">{{ $settlement['to'] }}</span>
-                                        <span class="text-gray-400 text-xs"> ({{ $settlement['expense'] }})</span>
                                     </p>
-                                    @if(auth()->user()->name === $settlement['from'])
-                                        <button onclick="alert('Marquer comme payé')"
-                                            class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium rounded-lg transition">
-                                            Marquer payé
-                                        </button>
-                                        
-                                    @endif
+
                                 </div>
                             @endforeach
                         </div>
@@ -259,8 +242,7 @@
 
                     @if (auth()->user()->id === $colocation->owner_id)
                         <div class="mt-6 bg-gray-50 rounded-lg border border-gray-200 p-4">
-                            <form method="POST" action="{{ route('categories.store', $colocation) }}"
-                                class="flex gap-2">
+                            <form method="POST" action="{{ route('categories.store', $colocation) }}" class="flex gap-2">
                                 @csrf
                                 <input type="text" name="name" placeholder="Nouvelle catégorie..." required
                                     class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">

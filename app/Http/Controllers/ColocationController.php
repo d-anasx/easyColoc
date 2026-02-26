@@ -17,7 +17,7 @@ class ColocationController extends Controller
 
         $expenses = $activeColocation->expenses()->with('payers')->get();
 
-        
+
         $userBalance = $expenses->sum(function ($exp) {
             $userId = auth()->id();
             $count  = $exp->payers->count();
@@ -43,19 +43,32 @@ class ColocationController extends Controller
     public function show($id)
     {
         $colocation = Colocation::with(['members', 'expenses.payers', 'expenses.createdBy', 'categories'])->findOrFail($id);
-        
+
         // settlements: per expense, members with is_paid = false owe createdBy
         $settlements = [];
+
         foreach ($colocation->expenses as $expense) {
             $share = round($expense->amount / max($expense->payers->count(), 1), 2);
+
             foreach ($expense->payers->where('pivot.is_paid', false) as $member) {
                 if ($member->id === $expense->created_by) continue;
-                $settlements[] = [
-                    'from'    => $member->name,
-                    'to'      => $expense->createdBy->name,
-                    'amount'  => $share,
-                    'expense' => $expense->title,
-                ];
+
+                $found = false;
+                foreach ($settlements as &$s) {
+                    if ($s['from'] === $member->name && $s['to'] === $expense->createdBy->name) {
+                        $s['amount'] = round($s['amount'] + $share, 2);
+                        $found = true;
+                        break;
+                    }
+                }
+
+                if (!$found) {
+                    $settlements[] = [
+                        'from'   => $member->name,
+                        'to'     => $expense->createdBy->name,
+                        'amount' => $share, 
+                    ];
+                }
             }
         }
         return view('colocations.show', compact('colocation', 'settlements'));
