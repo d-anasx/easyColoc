@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ColocationController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\InvitationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -15,6 +16,9 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::get('expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
     Route::get('expenses/{id}', [ExpenseController::class, 'show'])->name('expenses.show');
     Route::post('expenses/{id}/mark-paid', [ExpenseController::class, 'markAsPaid'])->name('expenses.markAsPaid');
+    Route::get('/colocations/{id}/invite', [ColocationController::class, 'invite'])->name('colocations.invite');
+    Route::get('colocations/join/{token}', [ColocationController::class, 'showInvitation'])->name('colocations.invitation');
+    Route::post('colocations/join/{token}', [ColocationController::class, 'join'])->name('colocations.join');
 });
 
 Route::middleware('auth')->group(function () {
@@ -23,4 +27,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

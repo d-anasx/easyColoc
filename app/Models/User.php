@@ -53,7 +53,10 @@ class User extends Authenticatable
         return $this->hasMany(Expense::class, 'created_by');
     }
 
-    
+    public function hasActiveColocation(): bool
+    {
+        return $this->colocations()->wherePivot('left_at', null)->exists();
+    }
 
 
     public function isAdmin(): bool

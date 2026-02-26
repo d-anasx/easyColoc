@@ -15,9 +15,9 @@
                         <p class="text-gray-600 mt-2">{{ $colocation->description }}</p>
                     @endif
                 </div>
-                @if (auth()->user()->id === $colocation->owner_id)
+                @if (auth()->user()->id === $colocation->owner()->id)
                     <div class="flex gap-2">
-                        <a href="{{ route('colocations.edit', $colocation) }}"
+                        <a href=""
                             class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition">
                             Modifier
                         </a>
@@ -65,8 +65,8 @@
                 <div x-show="tab === 'members'" class="space-y-4">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-bold text-gray-900">Membres de la colocation</h2>
-                        @if (auth()->user()->id === $colocation->owner_id)
-                            <a href="{{ route('invitations.create', $colocation) }}"
+                        @if (auth()->user()->id === $colocation->owner()->id)
+                            <a href="{{ route('colocations.invite', $colocation) }}"
                                 class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition">
                                 ➕ Inviter un membre
                             </a>
@@ -99,7 +99,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    @if (auth()->user()->id === $colocation->owner_id && $member->id !== $colocation->owner_id)
+                                    @if (auth()->user()->id === $colocation->owner()->id && $member->id !== $colocation->owner()->id)
                                         <button onclick="alert('Retirer le membre')"
                                             class="text-red-600 hover:text-red-800 text-sm font-medium">
                                             Retirer
@@ -231,7 +231,7 @@
                                 <div
                                     class="flex justify-between items-center bg-white rounded-lg border border-gray-200 p-4">
                                     <span class="font-medium text-gray-900">{{ $category->name }}</span>
-                                    @if (auth()->user()->id === $colocation->owner_id)
+                                    @if (auth()->user()->id === $colocation->owner()->id)
                                         <button onclick="alert('Supprimer')"
                                             class="text-red-600 hover:text-red-800 text-sm font-medium">Supprimer</button>
                                     @endif
@@ -240,9 +240,9 @@
                         </div>
                     @endif
 
-                    @if (auth()->user()->id === $colocation->owner_id)
+                    @if (auth()->user()->id === $colocation->owner()->id)
                         <div class="mt-6 bg-gray-50 rounded-lg border border-gray-200 p-4">
-                            <form method="POST" action="{{ route('categories.store', $colocation) }}" class="flex gap-2">
+                            <form method="POST" action="" class="flex gap-2">
                                 @csrf
                                 <input type="text" name="name" placeholder="Nouvelle catégorie..." required
                                     class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">

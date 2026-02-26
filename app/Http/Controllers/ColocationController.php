@@ -66,11 +66,57 @@ class ColocationController extends Controller
                     $settlements[] = [
                         'from'   => $member->name,
                         'to'     => $expense->createdBy->name,
-                        'amount' => $share, 
+                        'amount' => $share,
                     ];
                 }
             }
         }
         return view('colocations.show', compact('colocation', 'settlements'));
+    }
+
+    public function invite($id)
+    {
+        $token = encrypt($id);
+        $link = route('colocations.join', ['token' => $token]);
+        return redirect()->back()->with('success', "Lien d'invitation : " . $link);
+    }
+
+    public function showInvitation($token)
+    {
+        try {
+            $id = decrypt($token);
+        } catch (\Exception $e) {
+            abort(403, 'Lien invalide.');
+        }
+
+        $colocation = Colocation::with('members')->findOrFail($id);
+
+        return view('colocations.invitation', compact('colocation', 'token'));
+    }
+
+    public function join($token)
+    {
+        try {
+            $id = decrypt($token);
+        } catch (\Exception $e) {
+            abort(403, 'Lien invalide.');
+        }
+
+        $colocation = Colocation::findOrFail($id);
+
+        if (auth()->user()->hasActiveColocation()) {
+            return redirect()->route('dashboard')->with('error', 'Vous avez déjà une colocation active.');
+        }
+
+        if ($colocation->members->contains(auth()->id())) {
+            return redirect()->route('dashboard')->with('error', 'Vous êtes déjà membre.');
+        }
+
+        $colocation->members()->attach(auth()->id(), [
+            'role'      => 'member',
+            'joined_at' => now(),
+        ]);
+
+        return redirect()->route('colocations.show', $colocation->id)->with('success', 'Vous avez rejoint la colocation !');
     }
 }
