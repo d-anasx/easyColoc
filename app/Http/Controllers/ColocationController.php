@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Colocation;
+use Illuminate\Support\Facades\Auth;
 
 class ColocationController extends Controller
 {
@@ -17,13 +18,13 @@ class ColocationController extends Controller
 
         $expenses = $activeColocation->expenses()->with('payers')->get();
 
-
         $userBalance = $expenses->sum(function ($exp) {
-            $userId = auth()->id();
+            $userId = Auth::id();
             $count  = $exp->payers->count();
             $share  = round($exp->amount / $count, 2);
+            dump("Expense #{$exp->id}: amount={$exp->amount}, count={$count}, share={$share}");
             // if creator
-            if ($exp->created_by === $userId) {
+            if ($exp->paid_by === $userId) {
                 $unpaidCount = $exp->payers->filter(fn($p) => !$p->pivot->is_paid && $p->id !== $userId)->count();
                 return round($unpaidCount * $share, 2);
             }
@@ -36,6 +37,8 @@ class ColocationController extends Controller
 
             return -$share;
         });
+
+        
 
         return view('dashboard', compact('activeColocation', 'expenses', 'userBalance'));
     }
