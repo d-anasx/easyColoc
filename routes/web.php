@@ -20,6 +20,7 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::get('/colocations/{id}/invite', [ColocationController::class, 'invite'])->name('colocations.invite');
     Route::get('colocations/join/{token}', [ColocationController::class, 'showInvitation'])->name('colocations.invitation');
     Route::post('colocations/join/{token}', [ColocationController::class, 'join'])->name('colocations.join');
+    Route::delete('/colocations/{id}/leave', [ColocationController::class, 'leave'])->name('colocations.leave');
 });
 
 Route::middleware('auth')->group(function () {

@@ -17,12 +17,11 @@ class ColocationController extends Controller
         }
 
         $expenses = $activeColocation->expenses()->with('payers')->get();
-
+        $role = $activeColocation->members->find(auth()->id())->pivot->role ?? null;
         $userBalance = $expenses->sum(function ($exp) {
             $userId = Auth::id();
             $count  = $exp->payers->count();
             $share  = round($exp->amount / $count, 2);
-            dump("Expense #{$exp->id}: amount={$exp->amount}, count={$count}, share={$share}");
             // if creator
             if ($exp->paid_by === $userId) {
                 $unpaidCount = $exp->payers->filter(fn($p) => !$p->pivot->is_paid && $p->id !== $userId)->count();
@@ -40,7 +39,7 @@ class ColocationController extends Controller
 
         
 
-        return view('dashboard', compact('activeColocation', 'expenses', 'userBalance'));
+        return view('dashboard', compact('activeColocation', 'expenses', 'userBalance', 'role'));
     }
 
     public function show($id)
@@ -121,5 +120,18 @@ class ColocationController extends Controller
         ]);
 
         return redirect()->route('colocations.show', $colocation->id)->with('success', 'Vous avez rejoint la colocation !');
+    }
+
+    public function leave($id)
+    {
+        $colocation = Colocation::findOrFail($id);
+
+        if (!$colocation->members->contains(auth()->id())) {
+            return redirect()->route('dashboard')->with('error', 'Vous n\'êtes pas membre de cette colocation.');
+        }
+
+        $colocation->members()->updateExistingPivot(auth()->id(), ['left_at' => now()]);
+
+        return redirect()->route('dashboard')->with('success', 'Vous avez quitté la colocation.');
     }
 }
