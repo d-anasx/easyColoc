@@ -76,10 +76,10 @@
                     </p>
                 </div>
                 <div class="mt-4 space-y-2">
-                    <a href="" class="block w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition text-center">
+                    <a href="{{ route('expenses.create') }}" class="block w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition text-center">
                         Ajouter une dépense
                     </a>
-                    <a href="{{--{{ route('colocations.show', auth()->user()->activeColocation) }}--}}" class="block w-full px-4 py-2 border border-indigo-600 text-indigo-600 hover:bg-indigo-50 text-sm font-medium rounded-lg transition text-center">
+                    <a href="{{ route('colocations.show', auth()->user()->activeColocation()) }}" class="block w-full px-4 py-2 border border-indigo-600 text-indigo-600 hover:bg-indigo-50 text-sm font-medium rounded-lg transition text-center">
                         Voir les soldes
                     </a>
                 </div>

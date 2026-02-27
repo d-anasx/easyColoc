@@ -21,7 +21,7 @@ class ExpenseFactory extends Factory
     {
         return [
             'colocation_id' => Colocation::factory(),
-            'created_by' => User::factory(),
+            'paid_by' => User::factory(),
             'category_id' => Category::factory(),
             'title' => fake()->words(3, true),
             'amount' => fake()->randomFloat(2, 5, 500),

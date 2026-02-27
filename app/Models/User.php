@@ -39,10 +39,12 @@ class User extends Authenticatable
     public function colocations()
     {
         return $this->belongsToMany(Colocation::class, 'colocation_user')
-            ->withPivot('role', 'joined_at', 'left_at');
+            ->withPivot('role', 'joined_at', 'left_at')
+            ->wherePivotNull('left_at');
     }
 
-    public function expenses(){
+    public function expenses()
+    {
         return $this->belongsToMany(Expense::class, 'payments')
             ->withPivot('is_paid')
             ->withTimestamps();
@@ -69,7 +71,11 @@ class User extends Authenticatable
         return $this->is_banned;
     }
 
-    
+    public function activeColocation()
+    {
+        return $this->colocations()->first();
+    }
+
 
 
     /**

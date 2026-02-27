@@ -19,7 +19,7 @@ class Expense extends Model
 
     public function createdBy()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, 'paid_by');
     }
 
     public function category()
