@@ -100,10 +100,13 @@
                                         </div>
                                     </div>
                                     @if (auth()->user()->id === $colocation->owner()->id && $member->id !== $colocation->owner()->id)
-                                        <button onclick="alert('Retirer le membre')"
-                                            class="text-red-600 hover:text-red-800 text-sm font-medium">
-                                            Retirer
-                                        </button>
+                                        <form action="{{route('colocations.removeMember', ['colocationId' => $colocation->id, 'memberId' => $member->id])}}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir retirer ce membre ?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                                Retirer
+                                            </button>
+                                        </form>
                                     @endif
                                 </div>
                             </div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Colocation;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class ColocationController extends Controller
@@ -37,7 +38,7 @@ class ColocationController extends Controller
             return -$share;
         });
 
-        
+
 
         return view('dashboard', compact('activeColocation', 'expenses', 'userBalance', 'role'));
     }
@@ -122,16 +123,79 @@ class ColocationController extends Controller
         return redirect()->route('colocations.show', $colocation->id)->with('success', 'Vous avez rejoint la colocation !');
     }
 
+
+    function getUserDebt(Colocation $colocation, int $userId): float
+    {
+        $debt = 0;
+        foreach ($colocation->expenses as $expense) {
+            $share = round($expense->amount / max($expense->payers->count(), 1), 2);
+            $payer = $expense->payers->firstWhere('id', $userId);
+            if ($payer && !$payer->pivot->is_paid && $expense->paid_by !== $userId) {
+                $debt += $share;
+            }
+        }
+        return $debt;
+    }
+
+    function clearDebt(Colocation $colocation, int $userId): void
+    {
+        foreach ($colocation->expenses as $expense) {
+            $payer = $expense->payers->firstWhere('id', $userId);
+            if ($payer && !$payer->pivot->is_paid) {
+                $expense->payers()->detach($payer->id);
+            }
+        }
+    }
+
+
+    function updateReputation(User $user, float $debt): void
+    {
+        $debt > 0 ? $user->decrement('reputation') : $user->increment('reputation');
+    }
+
+
+
+
     public function leave($id)
     {
-        $colocation = Colocation::findOrFail($id);
+        $colocation = Colocation::with(['expenses.payers'])->findOrFail($id);
+        $user       = auth()->user();
+        $debt       = $this->getUserDebt($colocation, $user->id);
 
-        if (!$colocation->members->contains(auth()->id())) {
-            return redirect()->route('dashboard')->with('error', 'Vous n\'êtes pas membre de cette colocation.');
-        }
-
-        $colocation->members()->updateExistingPivot(auth()->id(), ['left_at' => now()]);
+        $this->updateReputation($user, $debt);
+        $this->clearDebt($colocation, $user->id);
+        $colocation->members()->updateExistingPivot($user->id, ['left_at' => now()]);
 
         return redirect()->route('dashboard')->with('success', 'Vous avez quitté la colocation.');
+    }
+
+
+    public function removeMember($colocationId, $memberId)
+    {
+        $colocation = Colocation::with(['expenses.payers'])->findOrFail($colocationId);
+        $member     = User::findOrFail($memberId);
+        $debt       = $this->getUserDebt($colocation, $memberId);
+
+        $this->updateReputation($member, $debt);
+
+        if ($debt > 0) {
+            foreach ($colocation->expenses as $expense) {
+                $payer = $expense->payers->firstWhere('id', $memberId);
+                if ($payer && !$payer->pivot->is_paid && $expense->paid_by !== $memberId) {
+
+                    // detach leaving member
+                    $expense->payers()->detach($memberId);
+
+                    // always attach owner as new unpaid entry
+                    $expense->payers()->attach(auth()->id(), ['is_paid' => false]);
+                }
+            }
+        } else {
+            $this->clearDebt($colocation, $memberId);
+        }
+
+        $colocation->members()->updateExistingPivot($memberId, ['left_at' => now()]);
+
+        return redirect()->back()->with('success', 'Membre retiré.');
     }
 }
