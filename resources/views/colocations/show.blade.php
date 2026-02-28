@@ -180,7 +180,7 @@
                                     class="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
                                     <p class="text-sm font-medium text-gray-900">
                                         <span class="font-semibold text-indigo-600">{{ $settlement['from'] }}</span>
-                                        <span class="text-gray-600"> doit </span>
+                                        <span class="text-gray-600"> doit payer </span>
                                         <span
                                             class="font-semibold text-emerald-600">{{ number_format($settlement['amount'], 2, ',', '.') }}€</span>
                                         <span class="text-gray-600"> à </span>
@@ -199,30 +199,7 @@
                             'ctaText' => null,
                         ])
                     @endif
-
-                    <!-- Individual Balances -->
-                    <div class="mt-8 border-t pt-6">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4">Soldes individuels</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            @foreach ($colocation->members as $member)
-                                @php
-                                    $balance = $balances[$member->id] ?? 0;
-                                @endphp
-                                <div class="bg-white rounded-lg border border-gray-200 p-4">
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-600">{{ $member->name }}</p>
-                                            <p
-                                                class="text-2xl font-bold mt-2 {{ $balance >= 0 ? 'text-emerald-600' : 'text-red-600' }}">
-                                                {{ $balance >= 0 ? '+' : '' }}{{ number_format($balance, 2, ',', '.') }}€
-                                            </p>
-                                        </div>
-                                        <div class="text-3xl">{{ $balance >= 0 ? '✓' : '↗' }}</div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
+                    
                 </div>
 
                 <!-- Categories Tab -->

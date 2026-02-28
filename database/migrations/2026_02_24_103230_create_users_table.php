@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('password');
             $table->boolean('is_banned')->default(false);
             $table->integer('reputation')->default(0);
-            $table->foreignId('role_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('role_id')->constrained()->cascadeOnDelete()->default(1);
             $table->timestamps();
         });
 

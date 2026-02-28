@@ -11,6 +11,7 @@ class ColocationController extends Controller
 {
     public function index()
     {
+        $userId = Auth::id();
         $activeColocation = auth()->user()->colocations()->wherePivot('left_at', null)->first();
 
         if (!$activeColocation) {
@@ -18,24 +19,21 @@ class ColocationController extends Controller
         }
 
         $expenses = $activeColocation->expenses()->with('payers')->get();
-        $role = $activeColocation->members->find(auth()->id())->pivot->role ?? null;
-        $userBalance = $expenses->sum(function ($exp) {
-            $userId = Auth::id();
-            $count  = $exp->payers->count();
-            $share  = round($exp->amount / $count, 2);
-            // if creator
-            if ($exp->paid_by === $userId) {
-                $unpaidCount = $exp->payers->filter(fn($p) => !$p->pivot->is_paid && $p->id !== $userId)->count();
-                return round($unpaidCount * $share, 2);
-            }
+        $role = $activeColocation->members->find(Auth::id())->pivot->role ?? null;
+        $userBalance = $expenses->sum(function ($exp) use ($userId) {
 
-            // if payer
             $payer = $exp->payers->firstWhere('id', $userId);
-            if (!$payer || $payer->pivot->is_paid) {
-                return 0;
+
+            if ($exp->paid_by === $userId) {
+                return $exp->payers->filter(fn($p) => !$p->pivot->is_paid && $p->id !== $userId)
+                    ->sum(fn($p) => $p->pivot->amount);
             }
 
-            return -$share;
+            if ($payer && !$payer->pivot->is_paid) {
+                return -$payer->pivot->amount;
+            }
+
+            return 0;
         });
 
 
@@ -43,23 +41,32 @@ class ColocationController extends Controller
         return view('dashboard', compact('activeColocation', 'expenses', 'userBalance', 'role'));
     }
 
+    public function create()
+    {
+        if (auth()->user()->hasActiveColocation()) {
+            return redirect()->route('dashboard')->with('error', 'Vous avez déjà une colocation active.');
+        }
+
+        return view('colocations.create');
+    }
+
     public function show($id)
     {
         $colocation = Colocation::with(['members', 'expenses.payers', 'expenses.createdBy', 'categories'])->findOrFail($id);
 
-        // settlements: per expense, members with is_paid = false owe createdBy
+        // settlements: per expense, members with is_paid = false owe payer
         $settlements = [];
 
         foreach ($colocation->expenses as $expense) {
             $share = round($expense->amount / max($expense->payers->count(), 1), 2);
 
             foreach ($expense->payers->where('pivot.is_paid', false) as $member) {
-                if ($member->id === $expense->created_by) continue;
+                if ($member->id === $expense->paid_by) continue;
 
                 $found = false;
-                foreach ($settlements as &$s) {
+                foreach ($settlements as $s) {
                     if ($s['from'] === $member->name && $s['to'] === $expense->createdBy->name) {
-                        $s['amount'] = round($s['amount'] + $share, 2);
+                        $s['amount'] = round($s['amount'] + $member->pivot->amount, 2);
                         $found = true;
                         break;
                     }
@@ -69,7 +76,7 @@ class ColocationController extends Controller
                     $settlements[] = [
                         'from'   => $member->name,
                         'to'     => $expense->createdBy->name,
-                        'amount' => $share,
+                        'amount' => $member->pivot->amount, // use pivot->amount
                     ];
                 }
             }
@@ -111,11 +118,11 @@ class ColocationController extends Controller
             return redirect()->route('dashboard')->with('error', 'Vous avez déjà une colocation active.');
         }
 
-        if ($colocation->members->contains(auth()->id())) {
+        if ($colocation->members->contains(Auth::id())) {
             return redirect()->route('dashboard')->with('error', 'Vous êtes déjà membre.');
         }
 
-        $colocation->members()->attach(auth()->id(), [
+        $colocation->members()->attach(Auth::id(), [
             'role'      => 'member',
             'joined_at' => now(),
         ]);
@@ -128,10 +135,9 @@ class ColocationController extends Controller
     {
         $debt = 0;
         foreach ($colocation->expenses as $expense) {
-            $share = round($expense->amount / max($expense->payers->count(), 1), 2);
             $payer = $expense->payers->firstWhere('id', $userId);
             if ($payer && !$payer->pivot->is_paid && $expense->paid_by !== $userId) {
-                $debt += $share;
+                $debt += $payer->pivot->amount;
             }
         }
         return $debt;
@@ -183,15 +189,24 @@ class ColocationController extends Controller
                 $payer = $expense->payers->firstWhere('id', $memberId);
                 if ($payer && !$payer->pivot->is_paid && $expense->paid_by !== $memberId) {
 
-                    // detach leaving member
+                    // detach member
                     $expense->payers()->detach($memberId);
 
-                    // always attach owner as new unpaid entry
-                    $expense->payers()->attach(auth()->id(), ['is_paid' => false]);
+                    // add member's share to owner's amount
+                    $ownerPayer = $expense->payers->firstWhere('id', Auth::id());
+                    if ($ownerPayer) {
+                        $expense->payers()->updateExistingPivot(Auth::id(), [
+                            'amount'  => $ownerPayer->pivot->amount + $payer->pivot->amount,
+                            'is_paid' => false,
+                        ]);
+                    } else {
+                        $expense->payers()->attach(Auth::id(), [
+                            'is_paid' => false,
+                            'amount'  => $payer->pivot->amount,
+                        ]);
+                    }
                 }
             }
-        } else {
-            $this->clearDebt($colocation, $memberId);
         }
 
         $colocation->members()->updateExistingPivot($memberId, ['left_at' => now()]);

@@ -155,7 +155,7 @@
             <!-- No Active Colocation CTAs -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Create Colocation -->
-                <a href="{{-- {{ route('colocations.create') }} --}}" class="group">
+                <a href="{{ route('colocations.create') }}" class="group">
                     <div
                         class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg p-8 text-white cursor-pointer hover:shadow-lg transition transform hover:scale-105 h-full">
                         <div class="text-4xl mb-4">🏠</div>

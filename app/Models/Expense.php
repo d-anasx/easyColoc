@@ -29,7 +29,7 @@ class Expense extends Model
 
     public function payers(){
         return $this->belongsToMany(User::class, 'payments')
-            ->withPivot('is_paid')
+            ->withPivot('is_paid','amount')
             ->withTimestamps();
     }
 }
