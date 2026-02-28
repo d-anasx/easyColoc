@@ -17,7 +17,7 @@
                 🏠 Ma Colocation
             </a>
 
-            <a href="{{ route('expenses.index') }}"
+            <a href="{{ route('colocations.show', $activeColocation->id) }}"
                 class="block px-4 py-2 rounded-lg font-medium transition {{ request()->routeIs('expenses.*') ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50' }}">
                 💸 Dépenses
             </a>

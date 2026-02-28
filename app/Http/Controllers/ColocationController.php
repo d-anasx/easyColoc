@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Colocation;
 use App\Models\User;
+use App\Http\Requests\StoreColocationRequest;
 use Illuminate\Support\Facades\Auth;
 
 class ColocationController extends Controller
@@ -48,6 +49,23 @@ class ColocationController extends Controller
         }
 
         return view('colocations.create');
+    }
+
+
+    public function store(StoreColocationRequest $request)
+    {
+        $colocation = Colocation::create([
+            'name'        => $request->name,
+            'description' => $request->description,
+            'status'      => 'active',
+        ]);
+
+        $colocation->members()->attach(auth()->id(), [
+            'role'      => 'owner',
+            'joined_at' => now(),
+        ]);
+
+        return redirect()->route('colocations.show', $colocation->id)->with('success', 'Colocation créée avec succès.');
     }
 
     public function show($id)
