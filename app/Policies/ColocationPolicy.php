@@ -7,6 +7,10 @@ use App\Models\Colocation;
 
 class ColocationPolicy
 {
+    public function view(User $user, Colocation $colocation): bool
+    {
+        return $colocation->members->contains($user->id);
+    }
 
     public function invite(User $user, Colocation $colocation): bool
     {

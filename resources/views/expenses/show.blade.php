@@ -30,7 +30,7 @@
                 <div>
                     <p class="text-xs text-gray-500 uppercase font-semibold">Catégorie</p>
                     <span class="inline-block px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded">
-                        {{ $expense->category->name }}
+                        {{ $expense->category->name??'Non catégorisé' }}
                     </span>
                 </div>
                 <div>

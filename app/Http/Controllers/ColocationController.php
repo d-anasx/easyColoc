@@ -75,7 +75,7 @@ class ColocationController extends Controller
     {
         $colocation = Colocation::with(['members', 'expenses.payers', 'expenses.createdBy', 'categories'])->findOrFail($id);
 
-        // settlements: per expense, members with is_paid = false owe payer
+        // members with is_paid = false owe payer
         $settlements = [];
 
         foreach ($colocation->expenses as $expense) {
@@ -85,7 +85,7 @@ class ColocationController extends Controller
                 if ($member->id === $expense->paid_by) continue;
 
                 $found = false;
-                foreach ($settlements as $s) {
+                foreach ($settlements as &$s) {
                     if ($s['from'] === $member->name && $s['to'] === $expense->createdBy->name) {
                         $s['amount'] = round($s['amount'] + $member->pivot->amount, 2);
                         $found = true;
@@ -97,8 +97,9 @@ class ColocationController extends Controller
                     $settlements[] = [
                         'from'   => $member->name,
                         'to'     => $expense->createdBy->name,
-                        'amount' => $member->pivot->amount, // use pivot->amount
+                        'amount' => $member->pivot->amount, 
                     ];
+                    
                 }
             }
         }
