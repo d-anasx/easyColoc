@@ -27,6 +27,10 @@
 
         @if (auth()->user()->isAdmin())
             <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">Admin</div>
+            <a href="{{ route('admin.dashboard') }}"
+                class="block px-4 py-2 rounded-lg font-medium transition {{ request()->routeIs('admin.dashboard') ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50' }}">
+                🧮 Dashboard
+            </a>
             <a href="{{ route('admin.users.index') }}"
                 class="block px-4 py-2 rounded-lg font-medium transition {{ request()->routeIs('admin.users*') ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50' }}">
                 👥 Utilisateurs

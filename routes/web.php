@@ -27,7 +27,10 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::delete('colocations/{colocationId}/remove/{memberId}', [ColocationController::class, 'removeMember'])->name('colocations.removeMember');
     Route::post('colocations/{id}/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::delete('categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+    Route::get('banned', fn() => view('banned'))->name('banned');
 });
+
+
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
