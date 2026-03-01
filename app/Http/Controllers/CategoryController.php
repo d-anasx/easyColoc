@@ -7,6 +7,7 @@ use App\Models\Colocation;
 use App\Http\Requests\StoreCategoryRequest;
 use Illuminate\Support\Facades\Auth;
 
+
 class CategoryController extends Controller
 {
     public function store(StoreCategoryRequest $request, $id)
@@ -29,7 +30,7 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
-
+        $this->authorize('manage', $category);
         $member = $category->colocation->members->find(Auth::id());
         if (!$member || $member->pivot->role !== 'owner') {
             return redirect()->back()->with('error', 'Seul le propriétaire peut supprimer des catégories.');

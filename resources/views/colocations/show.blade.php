@@ -15,7 +15,7 @@
                         <p class="text-gray-600 mt-2">{{ $colocation->description }}</p>
                     @endif
                 </div>
-                
+
             </div>
         </div>
 
@@ -55,10 +55,12 @@
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-bold text-gray-900">Membres de la colocation</h2>
                         @if (auth()->user()->id === $colocation->owner()->id)
-                            <a href="{{ route('colocations.invite', $colocation) }}"
-                                class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition">
-                                ➕ Inviter un membre
-                            </a>
+                            @can('invite', $colocation)
+                                <a href="{{ route('colocations.invite', $colocation->id) }}"
+                                    class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition">
+                                    ➕ Inviter un membre
+                                </a>
+                            @endcan
                         @endif
                     </div>
 
@@ -88,11 +90,15 @@
                                             </div>
                                         </div>
                                     </div>
-                                    @if (auth()->user()->id === $colocation->owner()->id && $member->id !== $colocation->owner()->id)
-                                        <form action="{{route('colocations.removeMember', ['colocationId' => $colocation->id, 'memberId' => $member->id])}}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir retirer ce membre ?')">
+                                    @if (auth()->user()->id === $colocation->owner()->id && $member->id !== $colocation->owner()->id)   
+                                        <form
+                                            action="{{ route('colocations.removeMember', ['colocationId' => $colocation->id, 'memberId' => $member->id]) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Êtes-vous sûr de vouloir retirer ce membre ?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                            <button type="submit"
+                                                class="text-red-600 hover:text-red-800 text-sm font-medium">
                                                 Retirer
                                             </button>
                                         </form>
@@ -188,7 +194,7 @@
                             'ctaText' => null,
                         ])
                     @endif
-                    
+
                 </div>
 
                 <!-- Categories Tab -->
@@ -205,7 +211,8 @@
                                             onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                            <button type="submit"
+                                                class="text-red-600 hover:text-red-800 text-sm font-medium">
                                                 Supprimer
                                             </button>
                                         </form>
@@ -217,7 +224,8 @@
 
                     @if (auth()->user()->id === $colocation->owner()->id)
                         <div class="mt-6 bg-gray-50 rounded-lg border border-gray-200 p-4">
-                            <form method="POST" action="{{ route('categories.store', $colocation->id) }}" class="flex gap-2">
+                            <form method="POST" action="{{ route('categories.store', $colocation->id) }}"
+                                class="flex gap-2">
                                 @csrf
                                 <input type="text" name="name" placeholder="Nouvelle catégorie..." required
                                     class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
