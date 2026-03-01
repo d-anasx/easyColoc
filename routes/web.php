@@ -4,7 +4,8 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ColocationController;
 use App\Http\Controllers\ExpenseController;
-use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\AdminController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,6 +25,16 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::post('colocations/join/{token}', [ColocationController::class, 'join'])->name('colocations.join');
     Route::delete('/colocations/{id}/leave', [ColocationController::class, 'leave'])->name('colocations.leave');
     Route::delete('colocations/{colocationId}/remove/{memberId}', [ColocationController::class, 'removeMember'])->name('colocations.removeMember');
+    Route::post('colocations/{id}/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::delete('categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+});
+
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('users', [AdminController::class, 'users'])->name('users.index');
+    Route::post('users/{id}/ban', [AdminController::class, 'ban'])->name('users.ban');
+    Route::post('users/{id}/unban', [AdminController::class, 'unban'])->name('users.unban');
+    Route::get('stats', [AdminController::class, 'stats'])->name('stats');
 });
 
 Route::middleware('auth')->group(function () {

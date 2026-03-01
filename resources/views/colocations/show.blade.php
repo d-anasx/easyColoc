@@ -15,18 +15,7 @@
                         <p class="text-gray-600 mt-2">{{ $colocation->description }}</p>
                     @endif
                 </div>
-                @if (auth()->user()->id === $colocation->owner()->id)
-                    <div class="flex gap-2">
-                        <a href=""
-                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition">
-                            Modifier
-                        </a>
-                        <button onclick="showDeleteModal = true"
-                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition">
-                            Annuler
-                        </button>
-                    </div>
-                @endif
+                
             </div>
         </div>
 
@@ -212,8 +201,14 @@
                                     class="flex justify-between items-center bg-white rounded-lg border border-gray-200 p-4">
                                     <span class="font-medium text-gray-900">{{ $category->name }}</span>
                                     @if (auth()->user()->id === $colocation->owner()->id)
-                                        <button onclick="alert('Supprimer')"
-                                            class="text-red-600 hover:text-red-800 text-sm font-medium">Supprimer</button>
+                                        <form action="{{ route('categories.destroy', $category->id) }}" method="POST"
+                                            onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                                Supprimer
+                                            </button>
+                                        </form>
                                     @endif
                                 </div>
                             @endforeach
@@ -222,7 +217,7 @@
 
                     @if (auth()->user()->id === $colocation->owner()->id)
                         <div class="mt-6 bg-gray-50 rounded-lg border border-gray-200 p-4">
-                            <form method="POST" action="" class="flex gap-2">
+                            <form method="POST" action="{{ route('categories.store', $colocation->id) }}" class="flex gap-2">
                                 @csrf
                                 <input type="text" name="name" placeholder="Nouvelle catégorie..." required
                                     class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">

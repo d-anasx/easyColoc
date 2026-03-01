@@ -174,7 +174,7 @@
                     <h3 class="text-2xl font-bold mb-2">Rejoindre une colocation</h3>
                     <p class="text-emerald-100 mb-4">Avez-vous reçu une invitation? Acceptez-la pour rejoindre une
                         colocation existante.</p>
-                    <p class="text-sm text-emerald-100">Recherchez votre lien d'invitation dans vos emails</p>
+                    <p class="text-sm text-emerald-100">Recherchez votre lien d'invitation</p>
                 </div>
             </div>
         @endif
