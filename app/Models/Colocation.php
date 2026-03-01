@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Colocation extends Model
 {
     use HasFactory;
+    protected $casts = [
+        'created_at' => 'datetime',
+    ];
     protected $fillable = ['name', 'description', 'status'];
 
     public function members()
@@ -43,6 +46,4 @@ class Colocation extends Model
     {
         $this->update(['status' => 'cancelled']);
     }
-
-    
 }

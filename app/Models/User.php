@@ -30,6 +30,12 @@ class User extends Authenticatable
         'reputation',
     ];
 
+    protected $casts = [
+        'is_banned'  => 'boolean',
+        'password'   => 'hashed',
+        'created_at' => 'datetime',
+    ];
+
 
     public function role()
     {
