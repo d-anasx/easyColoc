@@ -74,6 +74,11 @@
                                 <p class="text-lg font-bold text-gray-900">
                                     {{ number_format($activeColocation->expenses->sum('amount'), 2, ',', '.') }}DH</p>
                             </div>
+                            <div>
+                                <p class="text-xs text-gray-600 uppercase font-semibold">Votre total dépensé</p>
+                                <p class="text-lg font-bold text-gray-900">
+                                    {{ number_format($userTotalSpent, 2, ',', '.') }}DH</p>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -14,13 +14,16 @@ class ColocationController extends Controller
     {
         $userId = Auth::id();
         $activeColocation = auth()->user()->colocations()->wherePivot('left_at', null)->first();
-
+         
         if (!$activeColocation) {
             return view('dashboard', ['activeColocation' => null, 'expenses' => collect(), 'userBalance' => 0]);
         }
 
         $expenses = $activeColocation->expenses()->with('payers')->get();
         $role = $activeColocation->members->find(Auth::id())->pivot->role ?? null;
+        $userTotalSpent = $expenses
+                        ->filter(fn($exp) => $exp->paid_by === $userId)
+                        ->sum('amount');
         $userBalance = $expenses->sum(function ($exp) use ($userId) {
 
             $payer = $exp->payers->firstWhere('id', $userId);
@@ -39,7 +42,7 @@ class ColocationController extends Controller
 
 
 
-        return view('dashboard', compact('activeColocation', 'expenses', 'userBalance', 'role'));
+        return view('dashboard', compact('activeColocation', 'expenses', 'userBalance', 'role', 'userTotalSpent'));
     }
 
     public function create()
