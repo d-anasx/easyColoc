@@ -74,7 +74,7 @@ class ColocationController extends Controller
     public function show($id)
     {
         $colocation = Colocation::with(['members', 'expenses.payers', 'expenses.createdBy', 'categories'])->findOrFail($id);
-
+        $this->authorize('view', $colocation);
         // members with is_paid = false owe payer
         $settlements = [];
 

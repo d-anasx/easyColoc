@@ -12,7 +12,7 @@ class ExpenseController extends Controller
     public function show($id)
     {
         $expense = Expense::with(['payers', 'createdBy', 'category'])->findOrFail($id);
-
+        $this->authorize('view', $expense);
         $currentPayer = $expense->payers->firstWhere('id', auth()->id());
         $share = $currentPayer?->pivot->amount ?? 0;
 
@@ -22,6 +22,7 @@ class ExpenseController extends Controller
     public function create()
     {
         $colocation = auth()->user()->colocations()->first();
+        $this->authorize('create', $colocation);
         $members    = $colocation->members;
         $categories = $colocation->categories;
         return view('expenses.create', compact('members', 'categories'));
