@@ -114,7 +114,26 @@
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h2 class="text-lg font-bold text-gray-900">Dépenses récentes</h2>
                 </div>
-                @if ($activeColocation->expenses->count() > 0)
+                <!-- Month Filter -->
+                <div class="bg-white rounded-lg border border-gray-200 p-4">
+                    <form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-3">
+                        <label class="text-sm font-semibold text-gray-700">Filtrer par mois :</label>
+                        <select name="month" onchange="this.form.submit()"
+                            class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                            <option value="">Tous les mois</option>
+                            @foreach (['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'] as $i => $month)
+                                <option value="{{ $i + 1 }}" {{ $selectedMonth == $i + 1 ? 'selected' : '' }}>
+                                    {{ $month }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @if ($selectedMonth)
+                            <a href="{{ route('dashboard') }}"
+                                class="text-sm text-indigo-600 hover:underline">Réinitialiser</a>
+                        @endif
+                    </form>
+                </div>
+                @if ($expenses->count() > 0)
                     <div class="overflow-x-auto">
                         <table class="w-full">
                             <thead class="bg-gray-50 border-b border-gray-200">
@@ -126,7 +145,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($activeColocation->expenses as $expense)
+                                @foreach ($expenses as $expense)
                                     <tr class="border-b border-gray-200 hover:bg-gray-50">
                                         <td class="px-6 py-4">
                                             <p class="text-sm font-medium text-gray-900">{{ $expense->title }}</p>

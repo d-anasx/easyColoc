@@ -19,11 +19,23 @@ class ColocationController extends Controller
             return view('dashboard', ['activeColocation' => null, 'expenses' => collect(), 'userBalance' => 0]);
         }
 
-        $expenses = $activeColocation->expenses()->with('payers')->get();
+        $selectedMonth = request('month');
+
+        $expensesQuery = $activeColocation->expenses()->with('payers');
+
+        if ($selectedMonth) {
+            $expensesQuery->whereMonth('created_at', $selectedMonth);
+        }
+
+        $expenses = $expensesQuery->get();
+
         $role = $activeColocation->members->find(Auth::id())->pivot->role ?? null;
+
         $userTotalSpent = $expenses
                         ->filter(fn($exp) => $exp->paid_by === $userId)
                         ->sum('amount');
+
+
         $userBalance = $expenses->sum(function ($exp) use ($userId) {
 
             $payer = $exp->payers->firstWhere('id', $userId);
@@ -42,7 +54,7 @@ class ColocationController extends Controller
 
 
 
-        return view('dashboard', compact('activeColocation', 'expenses', 'userBalance', 'role', 'userTotalSpent'));
+        return view('dashboard', compact('activeColocation', 'expenses', 'userBalance', 'role', 'userTotalSpent', 'selectedMonth'));
     }
 
     public function create()
