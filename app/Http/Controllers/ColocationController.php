@@ -185,6 +185,13 @@ class ColocationController extends Controller
         $colocation = Colocation::with(['expenses.payers'])->findOrFail($id);
         $user       = auth()->user();
         $debt       = $this->getUserDebt($colocation, $user->id);
+        $member     = $colocation->members->find($user->id);
+
+        if ($member->pivot->role === 'owner') {
+            $colocation->members()->detach();
+            $colocation->update(['status' => 'inactive']);
+            return redirect()->route('dashboard')->with('success', 'Colocation annulée.');
+        }
 
         $this->updateReputation($user, $debt);
         $this->clearDebt($colocation, $user->id);
